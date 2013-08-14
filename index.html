@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+ <html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+       <style>
+		#list{
+			list-style:none;
+			border: 1px solid grey;
+			margin: 0;
+			padding: 0;
+		}
+		#list .item{
+			text-align : left;
+			padding: 0 0 0 20px;
+			font-size: 20px;
+			font-family : Tahoma, sans-serif;
+		}
+		#list .item:nth-child(even){
+			background: rgba(0, 0, 0, 0.3);    
+		}
+	   </style>
+	  
+
+
+
+    </head>
+    <body>
+	
+			<div class="console_log">
+				<ul id="list">
+						
+				</ul>
+			</div>
+			 <script type="text/javascript">
+		/**
+* Создаём переменную для списка
+*/
+
+/**
+* Создаём метод вывода элементов в список
+*/
+function render(str){         
+	var list = document.getElementById('list');                      
+    var li = document.createElement('LI');
+    li.className = "item";
+    li.innerHTML = str;    
+    list.appendChild( li );         
+}
+/**
+* Сравниваем координаты
+*/
+function сompareСoordinates(arr, arr2){
+    if (arr[0] == arr2[0] && arr[1] == arr2[1]){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+/**
+ * Создает экземпляр космического корабля.
+ * @name Vessel
+ * @param {String} name Название корабля.
+ * @param {Number}[] position Местоположение корабля.
+ * @param {Number} capacity Грузоподъемность корабля.
+ */
+
+
+function Vessel(name, position, capacity) { 
+    this.name = name;
+    this.position = position;
+    this.capacity = capacity;     
+    this.OccupiedSpace = 0;
+}
+
+/**
+ * Выводит текущее состояние корабля: имя, местоположение, доступную грузоподъемность.
+ * @example
+ * vessel.report(); // Грузовой корабль. Местоположение: Земля. Товаров нет.
+ * @example
+ * vesserl.report(); // Грузовой корабль. Местоположение: 50,20. Груз: 200т.
+ * @name Vessel.report
+ */
+Vessel.prototype.report = function () {  
+    var strResult = "Корабль "+this.name+". Местоположение: "+this.position+". Занято "+this.OccupiedSpace+" из "+this.capacity+"т.";      
+    render(strResult);
+}
+
+/**
+ * Выводит количество свободного места на корабле.
+ * @name Vessel.getFreeSpace
+ */
+Vessel.prototype.getFreeSpace = function () {     
+    return (this.capacity - this.OccupiedSpace);
+}
+
+/**
+ * Выводит количество занятого места на корабле.
+ * @name Vessel.getOccupiedSpace
+ */
+Vessel.prototype.getOccupiedSpace = function () {    
+    return this.OccupiedSpace;
+}
+
+/**
+ * Переносит корабль в указанную точку.
+ * @param {Number}[]|Planet newPosition Новое местоположение корабля.
+ * @example
+ * vessel.flyTo([1,1]);
+ * @example
+ * var earth = new Planet('Земля', [1,1]);
+ * vessel.flyTo(earth);
+ * @name Vessel.report
+ */
+Vessel.prototype.flyTo = function (newPosition) {         
+    if (newPosition.length == undefined){
+        this.position = newPosition.position;
+    }else{
+        this.position = newPosition;    
+    }
+}
+
+/**
+ * Создает экземпляр планеты.
+ * @name Planet
+ * @param {String} name Название Планеты.
+ * @param {Number}[] position Местоположение планеты.
+ * @param {Number} availableAmountOfCargo Доступное количество груза.
+ */
+function Planet(name, position, availableAmountOfCargo) {
+    this.name = name;
+    this.position = position;
+    if (availableAmountOfCargo != undefined){
+        this.availableAmountOfCargo = availableAmountOfCargo;
+    }else{
+        this.availableAmountOfCargo = 0;
+    }
+    
+}
+
+/**
+ * Выводит текущее состояние планеты: имя, местоположение, количество доступного груза.
+ * @name Planet.report
+ */
+Planet.prototype.report = function () {
+    var strRender = "Планета "+this.name+". Местоположение "+this.position+". ";  
+    if (this.availableAmountOfCargo == 0){
+        strRender += "Грузов нет.";
+    }else{
+        strRender += "Доступно груза: "+this.availableAmountOfCargo+"т.";
+    }    
+    render(strRender);
+}
+
+/**
+ * Возвращает доступное количество груза планеты.
+ * @name Vessel.getAvailableAmountOfCargo
+ */
+Planet.prototype.getAvailableAmountOfCargo = function () {
+     return this.availableAmountOfCargo;    
+}
+
+/**
+ * Загружает на корабль заданное количество груза.
+ * 
+ * Перед загрузкой корабль должен приземлиться на планету.
+ * @param {Vessel} vessel Загружаемый корабль.
+ * @param {Number} cargoWeight Вес загружаемого груза.
+ * @name Vessel.loadCargoTo
+ */
+Planet.prototype.loadCargoTo = function (vessel, cargoWeight) {    
+    
+    if (this.getAvailableAmountOfCargo() >= cargoWeight){
+   
+            if (сompareСoordinates(vessel.position, this.position)){        
+                if (vessel.getFreeSpace() >= cargoWeight){
+                    vessel.OccupiedSpace += cargoWeight;                    
+                    this.availableAmountOfCargo -= cargoWeight; 
+                }else{
+                    render("ERROR. Вес загрузки больше, чем вместимость корабля.");
+                }
+            }else{
+                render("ERROR. Координаты корабля и планеты не совпадают.");
+            }    
+        
+    }else{
+        render("ERROR. Вес загружаемого груза превышает доступный.");
+    }
+    
+}
+
+/**
+ * Выгружает с корабля заданное количество груза.
+ * 
+ * Перед выгрузкой корабль должен приземлиться на планету.
+ * @param {Vessel} vessel Разгружаемый корабль.
+ * @param {Number} cargoWeight Вес выгружаемого груза.
+ * @name Vessel.unloadCargoFrom
+ */
+Planet.prototype.unloadCargoFrom = function (vessel, cargoWeight) {
+    
+      if (vessel.getOccupiedSpace() >= cargoWeight){
+   
+            if (сompareСoordinates(vessel.position, this.position)){      
+                
+                this.availableAmountOfCargo += cargoWeight;
+                vessel.OccupiedSpace -= cargoWeight;    
+                
+            }else{
+                render("ERROR. Координаты корабля и планеты не совпадают.");
+            }    
+        
+    }else{
+        render("ERROR. Выгружаемый груз превосходит доступный груз на корабле.");
+    }   
+         
+}
+
+var vessel = new Vessel('Яндекс', [0,0], 1000);
+var planetA = new Planet('A', [0,0], 0);
+var planetB = new Planet('B', [100, 100], 5000);
+
+var planetC = new Planet('C', [200, 200], 501);
+var planetD = new Planet('D', [201, 201], 400);
+
+//Основной код
+
+// Проверка текущего состояния
+vessel.report(); // Корабль "Яндекс". Местоположение: 0,0. Занято: 0 из 1000т.
+planetA.report(); // Планета "A". Местоположене: 0,0. Грузов нет.
+planetB.report(); // Планета "B". Местоположене: 100,100. Доступно груза: 5000т.
+
+vessel.flyTo(planetB);
+planetB.loadCargoTo(vessel, 1000);
+vessel.report(); // Корабль "Яндекс". Местоположение: 100,100. Занято: 1000 из 1000т.
+
+vessel.flyTo(planetA);
+planetA.unloadCargoFrom(vessel, 500);
+vessel.report(); // Корабль "Яндекс". Местоположение: 0,0. Занято: 500 из 1000т.
+planetA.report(); // Планета "A". Местоположение: 0,0. Доступно груза: 500т.
+planetB.report(); // Планета "B". Местоположение: 100,100. Доступно груза: 4000т.
+
+//1. Проверяем, когда передаём не объект планет, а координаты
+vessel.flyTo([250, 250]);//Полетели просто по любым координатам
+vessel.report();
+//2. Проверяем, когда загружаемый груз на корабль, превосходит доступный
+vessel.flyTo(planetC);
+planetC.loadCargoTo(vessel, 501);//ловим ошибку
+//3. Проверяем, когда выгружаемый превышает доступный на корабле
+planetC.unloadCargoFrom(vessel, 501);//ловим ошибку
+vessel.flyTo(planetD);
+//4. Проверяем, когда вес загружаемого груза на корабль с планеты, превосходит доступный
+planetD.loadCargoTo(vessel, 450);//ловим ошибку
+//5. Проверяем координаты при работе с планетой, по обычному виду [x, y]
+vessel.flyTo([200, 200]);//Летим на планету C
+planetC.unloadCargoFrom(vessel, 400);
+vessel.report();
+//6. Проверяем, что если мы не на планете и хотим выгрузиться на неё
+planetD.unloadCargoFrom(vessel, 100);//Ловим ошибку координат
+
+
+
+
+
+	   </script>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+
+    </body>
+</html>
